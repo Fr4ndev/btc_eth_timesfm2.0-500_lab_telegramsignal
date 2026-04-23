@@ -1,0 +1,67 @@
+"""
+app/model.py - Versión final con token HF correcto
+"""
+import logging
+import os
+from typing import Optional, Any
+
+logger = logging.getLogger(__name__)
+
+_model: Optional[Any] = None
+_model_loaded: bool = False
+_device_info: str = "unloaded"
+
+def load_model(settings):
+    global _model, _model_loaded, _device_info
+
+    logger.info("Cargando TimesFM 2.0-500M usando API antigua...")
+
+    try:
+        # === PONER EL TOKEN AQUÍ ===
+        HF_TOKEN = "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"          # ← CAMBIA ESTO por tu token real
+        if HF_TOKEN and HF_TOKEN != "hf_tu_token_aqui":
+            os.environ["HF_TOKEN"] = HF_TOKEN
+            logger.info("HF_TOKEN configurado desde código")
+
+        import timesfm
+
+        hparams = timesfm.TimesFmHparams(
+            backend="cpu",
+            per_core_batch_size=16,
+            horizon_len=128,
+            context_len=2048,
+        )
+
+        checkpoint = timesfm.TimesFmCheckpoint(
+            huggingface_repo_id="google/timesfm-2.0-500m-pytorch"
+        )
+
+        model = timesfm.TimesFm(hparams=hparams, checkpoint=checkpoint)
+        
+        try:
+            model.compile()
+            logger.info("Model compiled successfully")
+        except Exception as e:
+            logger.warning("Compile skipped: %s", e)
+
+        _model = model
+        _model_loaded = True
+        _device_info = "cpu"
+
+        logger.info("✅ TimesFM 2.0-500M cargado correctamente en CPU")
+        return True
+
+    except Exception as e:
+        logger.error("Error cargando TimesFM: %s", str(e), exc_info=True)
+        raise
+
+def get_model() -> Any:
+    if not _model_loaded or _model is None:
+        raise RuntimeError("Modelo no cargado. Revisa los logs.")
+    return _model
+
+def get_device_info() -> str:
+    return _device_info
+
+def is_loaded() -> bool:
+    return _model_loaded
