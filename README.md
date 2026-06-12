@@ -93,4 +93,3 @@ Returns system health, model loading status, and the current hardware device pro
 - `/app/skills/ccxt_skill.py`: Data-fetching engine designed to construct pristine OHLCV DataFrames.
 - `/watcher.py`: Institutional-grade Telegram notification and validation daemon.
 
-> **Note on Docker:** This repository has been streamlined for local bare-metal deployments (Native Python envs). Previous Docker configurations (`docker-compose.yml`, `Dockerfile`) have been intentionally deprecated to maintain an agile and clean local development and deployment cycle.
